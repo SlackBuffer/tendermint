@@ -78,7 +78,7 @@ type evidencePool interface {
 // commits blocks to the chain and executes them against the application.
 // The internal state machine receives input from peers, the internal validator, and from a timer.
 type State struct {
-	service.BaseService
+	service.BaseService // !!! 结构体
 
 	// config details
 	config            *config.ConsensusConfig
@@ -634,6 +634,7 @@ func (cs *State) reconstructLastCommit(state sm.State) {
 	cs.LastCommit = lastPrecommits
 }
 
+// !!! 用 state 和里面的字段进行校验和赋值
 // Updates State and increments height to match that of state.
 // The round becomes 0 and cs.Step becomes cstypes.RoundStepNewHeight.
 func (cs *State) updateToState(state sm.State) {
@@ -1006,6 +1007,7 @@ func (cs *State) handleTxsAvailable() {
 	cs.mtx.Lock()
 	defer cs.mtx.Unlock()
 
+	// ??? HOW SO
 	// We only need to do this for round 0.
 	if cs.Round != 0 {
 		return
@@ -1384,12 +1386,12 @@ func (cs *State) enterPrevoteWait(height int64, round int32) {
 	cs.scheduleTimeout(cs.config.Prevote(round), height, round, cstypes.RoundStepPrevoteWait)
 }
 
-// Enter: `timeoutPrevote` after any +2/3 prevotes.
+// Enter: `timeoutPrevote` after any +2/3 prevotes.		(TODO
 // Enter: `timeoutPrecommit` after any +2/3 precommits.
 // Enter: +2/3 precomits for block or nil.
 // Lock & precommit the ProposalBlock if we have enough prevotes for it (a POL in this round)
-// else, unlock an existing lock and precommit nil if +2/3 of prevotes were nil,
-// else, precommit nil otherwise.
+// else, unlock an existing lock and precommit nil if +2/3 of prevotes were nil, 	(nil-polka)
+// else, precommit nil otherwise.	（no polka of any kind)
 func (cs *State) enterPrecommit(height int64, round int32) {
 	logger := cs.Logger.With("height", height, "round", round)
 
@@ -2166,12 +2168,13 @@ func (cs *State) addVote(vote *types.Vote, peerID types.NodeID) (added bool, err
 
 		// If +2/3 prevotes for *anything* for future round:
 		switch {
-		case cs.Round < vote.Round && prevotes.HasTwoThirdsAny():
+		case cs.Round < vote.Round && prevotes.HasTwoThirdsAny(): // 处于滞后 round，且未来轮已经有 2/3 个 prevote 投票表决（可以是对不同的内容的投票），说明集群中 2/3 节点都在新的一轮，节点没理由继续留在滞后 round
 			// Round-skip if there is any 2/3+ of votes ahead of us
 			cs.enterNewRound(height, vote.Round)
 
 		case cs.Round == vote.Round && cstypes.RoundStepPrevote <= cs.Step: // current round
 			blockID, ok := prevotes.TwoThirdsMajority()
+			// +2/3 了但是 proposal 没集齐
 			if ok && (cs.isProposalComplete() || len(blockID.Hash) == 0) {
 				cs.enterPrecommit(height, vote.Round)
 			} else if prevotes.HasTwoThirdsAny() {
