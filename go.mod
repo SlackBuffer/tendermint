@@ -11,9 +11,6 @@ require (
 	github.com/creachadair/atomicfile v0.2.4
 	github.com/creachadair/taskgroup v0.3.2
 	github.com/creachadair/tomledit v0.0.16
-	github.com/facebookgo/ensure v0.0.0-20160127193407-b4ab57deab51 // indirect
-	github.com/facebookgo/stack v0.0.0-20160209184415-751773369052 // indirect
-	github.com/facebookgo/subset v0.0.0-20150612182917-8dac2c3c4870 // indirect
 	github.com/fortytw2/leaktest v1.3.0
 	github.com/go-kit/kit v0.12.0
 	github.com/gogo/protobuf v1.3.2
@@ -40,7 +37,7 @@ require (
 	github.com/spf13/cobra v1.4.0
 	github.com/spf13/viper v1.11.0
 	github.com/stretchr/testify v1.7.1
-	github.com/tendermint/tm-db v0.6.6
+	github.com/tendermint/tm-db v0.6.7
 	github.com/vektra/mockery/v2 v2.10.6
 	golang.org/x/crypto v0.0.0-20220411220226-7b82a4e95df4
 	golang.org/x/net v0.0.0-20220412020605-290c469a71a5
